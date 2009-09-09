@@ -67,7 +67,7 @@ REQUIRED Any process must be able to join a group by connecting to the group lea
 
 REQUIRED Every process in a group must notify the other processes of any known changes to the group composition.
 
-REQUIRED Every process must keep track of the members of all group it's in.
+REQUIRED Every process must keep track of the members of all the groups it's a member of.
 
 REQUIRED Every process must monitor if another process in the group stops responding and report a corresponding change in group composition.
 
@@ -204,23 +204,32 @@ A central RMI-registry. Single point of failure. Leader registers and unregister
 \section{Use cases}
 
 \subsection{A node creates a new group}
-When a node wants to create a new group, it contacts the RMI-Registry and leaves a reference to ??? (Reference object factory lollypop?) under the name of the channel. If this succeeds it elects itself as the group leader. If this fails throw an exception indicating if the name was already taken or the RMI-Registry was unresponsive.
+When a node wants to create a new group, it connects to the RMI-Registry and leaves a reference to itself (Reference object factory lollypop?) under the name of the channel.
+
+If this succeeds it sets itself as the group leader and adds itself to it's view of the group in the GroupManagementModule.
+
+If the registration fails throw an exception indicating if the name was already taken or the RMI-Registry was unresponsive.
 
 \subsection{A group leader removes a group}
-The leader removes all members from it's view of the group and then sends this updated view to all members of the group. It then unregisters the group name in the registry.
+The leader removes all members from it's view of the group in GroupManagementModule and then sends this updated view to all members of the group via the CommunicationModule. It then unregisters the group name in the registry.
 
 \subsection{A member joins a group}
-When joining a group the prospective member connects to the RMI-Registry and gets a reference to the group leader. It then tells the group leader it want's to join the group. The leader adds the new member to it's view of the group and then sends this updated view to all members of the group, including the new member. When the new member receives the updated view it knows it is part of the group.
+When joining a group the prospective member connects to the RMI-Registry and gets a reference to the group leader. It then sends join request to the group leader. The leader adds the new member to it's view of the group and then sends this updated view to all members of the group, including the new member. When the new member receives the updated view it knows it is part of the group.
 
 \subsection{A member leaves group}
 When a member wants to leave a group it sends a group view excluding itself to all the members of the group.
 
 \subsection{Send message to a group}
+First a list of all members in the group is obtained from the GroupManagementModule and then the message is sent to all the members.
 
 \subsection{Member receives message with much later time-stamp than previous message}
+%TODO: Design a way for a node to request an older message
 
 \subsection{Group-leader leaves group}
-When the group-leader leaves the group the remaining members starts electing a new group leader by creating a semi-random (and unique) value and sending this to all other nodes. When a node receives messages it compares the value in the incoming message with the value it created and sends the larger of these to all other nodes. When a nodes receives messages with it's own values it sets itself as group-leader and registers with the RMI-Registry.
+When the group-leader leaves the group the remaining members starts electing a new group leader by creating a semi-random (and unique) value and sending this to all other nodes in an election-message.
+
+%TODO: A crashed node could make a group-leader election fail.
+When a node receives election-messages it compares the value in the incoming message with the value it created and sends the larger of these to all other nodes. When a node has received messages with it's own value from all members of the group it sets itself as group-leader and registers with the RMI-Registry.
 
 If the group-leader leaves a single member behind this node realizes it is alone in the group and sets itself as group-leader and registers with the registry.
 
