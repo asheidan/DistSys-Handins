@@ -1,0 +1,256 @@
+\documentclass[11pt,swedish]{article}
+\usepackage{a4,babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx,amssymb,amstext,amsmath,listings,color}
+\usepackage{setspace,varioref,url,placeins}
+
+\def\author			{Ludvig Widman(dit06lwn), Emil Eriksson(c07een)} 
+\def\email			{}
+\def\course			{Distributed Systems. 5DV020, HT09}
+\def\delivery		{Assignment part 1}
+\def\trivialname	{Project plan}
+\def\tutor			{Lars Larsson, Daniel Henriksson}
+\def\myabstract	{}
+
+%-----------------------------------------------------------
+\begin{document}
+%-----------------------------------------------------------
+\begin{titlepage}
+\noindent
+\course \\
+\author \\
+
+\noindent
+Handledare: \tutor \\
+Datum: \today \\
+
+
+\begin{center}
+		\vspace{20mm}
+        \Huge \delivery \\
+        \vspace{5mm}
+        \Huge \trivialname \\
+        \vspace{70mm}
+        
+\end{center}
+\end{titlepage}
+%-----------------------------------------------------------
+\thispagestyle{empty}
+\pagenumbering{roman}
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+
+\setstretch{1.3}	% Radavstånd
+% Mellanrum mellan stycken, inget indrag
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+
+
+%-----------------------------------------------------------
+\section{Bonus Level}
+We intend to solve bonus level two with dynamic groups. 
+
+
+%-----------------------------------------------------------
+\section{Requirement Specification}
+
+\subsection{Group management}
+REQUIRED External processes must be able to find and connect to group leaders via a RMI registry.
+
+REQUIRED The group leader must regularly make sure that the group and leader is registered in the RMI registry.
+
+REQUIRED Any process must be able to create a new group and register itself as leader in the registry.
+
+REQUIRED Any process must be able to join a group by conencting to the group leader. 
+
+REQUIRED Every process in a group must noitfy the other processes of any known changes to the group composition.
+
+REQUIRED Every process must keep track of the members of all group it's in.
+
+REQUIRED Every process must monitor if another process in the group stops responding and report a corresponding change in group composition.
+
+REQUIRED If the leader of the group leaves or crashes a new leader must be elected in the group.
+
+
+
+\subsection{Communication}
+REQUIRED It must be possible to send messages to the members of joined group.
+
+REQUIRED Both non-reliable and reliable multicast must be supported for sending messages.
+
+REQUIRED The communication method choosen by the group creator (reliable or non-reliable multicast) must be used when communicating in a group.
+
+REQUIRED Every mesage must contain a updated vector clock.
+
+
+
+\subsection{Message Ordering}
+REQUIRED Any message must arrive in proper order (according to the selected sorting requirements).
+
+REQUIRED A message must not be delivered until all previous messages are delivered if the message ordering demands so.
+
+
+Analyze the problem
+- What should be done, what problems needs to be solved
+- Requirement specification
+- What must be implemented
+- What should be implemented
+
+%-----------------------------------------------------------
+\section{Suitable tools}
+Identify suitable tools
+- Third party components
+	Java RMI
+	JUnit
+	log4j
+
+%-----------------------------------------------------------
+\section{Project plan}
+Plan your project
+- Project plan
+- Milestones with dates
+	11 Sept		- Part 1 due
+	18 Sept		- Milestone 1
+					Create interfaces
+					Build dataobjects
+	25 Sept		- Milestone 2
+	2 Oct		- Milestone 3
+	9 Oct		- Milestone 4
+	16 Oct		- Milestone 5
+	23 Oct		- Everything.
+		Test protocol
+		Full Report
+	27 Oct 		- Hand in
+		Proof reading by someone not involved
+	28-30 Oct 	- Demonstration
+
+%-----------------------------------------------------------
+\section{Design}
+Design a solution
+- Write design
+- Implement
+- ???
+- Profit!
+
+
+\subsection{CommunicationModule}
+Send and recieves messages to and from other processes. This module must support both reliable and basic multicast. Recieved data is sent to the MessageOrderingModule. The GroupManagementModule is also notified with the senders process ID. 
+- recieve
+- send(Group, Message)
+	Look up communication type in group
+	Look up group members
++ multicastB
++ multicastR
+
+
+\subsection{MessageOrderingModule}
+Sorts incoming messages and makes sure that they're delivered according to the specified order (Non-ordered, FIFO, Causal, Total, Causal-Total). Non-ordered is the main class and the other ordering methods is implemented as subclasses. 
+- queueMessage(Message)
+
+
+\subsection{GroupManagementModule}
+Stores a group state with group name(s) and group members. Monitors if a process stops responding. Notifies changes in the states to all members of the group (via the CommunicationModule). Resolves group names to a list of members.
+- addGroup
+- removeGroup
+- listGroups
+
+\subsection{Group}
+- addMember
+	Adds the member to the member list
+- removeMember
+	Removes the member from the member list
+- listMembers
+- notify(ProcessID)
+	Updates the last seen vector time for the process
+
+\subsection{GCom}
+A framework (middleware) for communicating between distributed nodes within groups
+	(Interface from previous year http://www.cs.umu.se/kurser/5DV020/HT08/GCom.java)
+
+- joinGroup(String groupName)
+	Contact RMI registry and get groupleader
+	Contact groupleader
+- createGroup
+	Register at RMI registry
+- removeGroup(String groupName)
+	Removes the group grom the RMI registry
+(leave/disconnect)
+	Send GroupView excluding sending Member
+- listGroups
+	Ask registry
+- listMembers(String groupName)
+- sendMessage(Group, Message)
+	Sends a message to the specified group via CommunicationModule
+- connectToRegistry(String host, int port)
+	Connects to a RMI registry
+
+
+\subsection{GUI}
+	Implements listeners
+	Does GUI-stuff
+
+\subsection{Debug}
+Registers DebugListener in every module.
+
+\subsection{Message}
+	VectorClock
+
+\subsection{RMI Registry}
+A central RMI-registry. Single point of failure. Leader registers and unregisters group. 
+
+%-----------------------------------------------------------
+\section{Use cases}
+
+\subsection{A node creates a new group}
+When a node wants to create a new group, it contacts the RMI-Registry and leaves a reference to ??? (Reference object factory lollypop?) under the name of the channel. If this succeeds it elects itself as the group leader. If this fails throw an exception indicating if the name was already taken or the RMI-Registry was unresponsive.
+
+\subsection{A group leader removes a group}
+The leader removes all members from it's view of the group and then sends this updated view to all members of the group. It then unregisters the group name in the registry.
+
+\subsection{A member joins a group}
+When joining a group the prospective member connects to the RMI-Registry and gets a reference to the group leader. It then tells the group leader it want's to join the group. The leader adds the new member to it's view of the group and then sends this updated view to all members of the group, including the new member. When the new member recieves the updated view it knows it is part of the group.
+
+\subsection{A member leaves group}
+When a member wants to leave a group it sends a group view excluding itself to all the members of the group.
+
+\subsection{Send message to a group}
+
+\subsection{Member recieves message with much later timestamp than previous message}
+
+\subsection{Groupleader leaves group}
+When the groupleader leaves the group the remaining members starts electing a new group leader by creating a semirandom (and unique) value and sending this to all other nodes. When a node recieves messages it compares the value in the incoming message with the value it created and sends the larger of theese to all other nodes. When a nodes recieves messages with it's own values it sets itself as groupleader and registers with the RMI-Registry.
+
+If the groupleader leaves a single member behind this node realizes it is alone in the group and sets itself as groupleader and registers with the registry.
+
+\subsection{Last member leaves group}
+When the last member of a group leaves it unregisters itself from the registry.
+
+%-----------------------------------------------------------
+\section{Fault tolerance}
+
+\subsection{Detecting crashed members}
+The GroupManagementModule gets notified when a message is recieved and can therefore keep track of the time since the last message from a process, measured in vector time. If a process does not send anything for a long time it will be marked as crashed and removed from the group list.
+
+\subsection{If the registry restarts}
+The leader if each group occationaly checks that the group is registered in the RMI-registry. If the registry has restarted for some reason the leader will re-register the group.
+
+\subsection{If the group leader crashes}
+If the group leader crashes the group elects a new leader. (How?)
+
+\subsection{If the last member of a group crashes}
+If the last member of a group crashes no one will unregister the group. 
+
+\subsection{Netsplit}
+If the group is split in two due to netsplit the part with the leader will continue to work as before, the other half will elect a new leader.
+
+%-----------------------------------------------------------
+\section{Limitations}
+The RMI-registry is a single point of failure. If the registry crashes no processes can find or join groups. 
+
+If a group is splitted in two parts due to network failure and both parts still have contact  with the registry bad things will happen. This is assumed to never happen.
+
+All processes are assumed to be good. If a process starts to lie or send malicious messages bad things will happen.
+
+\end{document}
