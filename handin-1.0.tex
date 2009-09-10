@@ -100,11 +100,9 @@ Analyze the problem
 
 %-----------------------------------------------------------
 \section{Suitable tools}
-Identify suitable tools
-- Third party components
-	Java RMI
-	JUnit
-	log4j
+Since the clear recommendation is to use Java and Java RMI we have decided to follow the recommendation. While there are languages that would be more interesting and easier to design GUIs in (cocoa/objective c), Java is more easily ported and the available help from lecturers also helped tip the balance in Java's favor.
+
+JUnit will be used for unit testing and logging will be done through the log4j-package. 
 
 %-----------------------------------------------------------
 \section{Project plan}
@@ -115,6 +113,7 @@ Plan your project
 	18 Sept		- Milestone 1
 					Create interfaces
 					Build dataobjects
+					Design GUI/Mockups for test app
 	25 Sept		- Milestone 2
 	2 Oct		- Milestone 3
 	9 Oct		- Milestone 4
@@ -133,6 +132,28 @@ Design a solution
 - Implement
 - ???
 - Profit!
+
+
+\subsection{GCom}
+A framework (middleware) for communicating between distributed nodes within groups
+	(Interface from previous year http://www.cs.umu.se/kurser/5DV020/HT08/GCom.java)
+
+- joinGroup(String groupName)
+	Contact RMI registry and get group-leader
+	Contact group-leader
+- createGroup
+	Register at RMI registry
+- removeGroup(String groupName)
+	Removes the group grom the RMI registry
+(leave/disconnect)
+	Send GroupView excluding sending Member
+- listGroups
+	Ask registry
+- listMembers(String groupName)
+- sendMessage(Group, Message)
+	Sends a message to the specified group via CommunicationModule
+- connectToRegistry(String host, int port)
+	Connects to a RMI registry
 
 
 \subsection{CommunicationModule}
@@ -162,30 +183,8 @@ Stores a group state with group name(s) and group members. Monitors if a process
 - removeMember
 	Removes the member from the member list
 - listMembers
-- notify(ProcessID)
+- updateica(ProcessID)
 	Updates the last seen vector time for the process
-
-\subsection{GCom}
-A framework (middleware) for communicating between distributed nodes within groups
-	(Interface from previous year http://www.cs.umu.se/kurser/5DV020/HT08/GCom.java)
-
-- joinGroup(String groupName)
-	Contact RMI registry and get group-leader
-	Contact group-leader
-- createGroup
-	Register at RMI registry
-- removeGroup(String groupName)
-	Removes the group grom the RMI registry
-(leave/disconnect)
-	Send GroupView excluding sending Member
-- listGroups
-	Ask registry
-- listMembers(String groupName)
-- sendMessage(Group, Message)
-	Sends a message to the specified group via CommunicationModule
-- connectToRegistry(String host, int port)
-	Connects to a RMI registry
-
 
 \subsection{GUI}
 	Implements listeners
@@ -204,7 +203,7 @@ A central RMI-registry. Single point of failure. Leader registers and unregister
 \section{Use cases}
 
 \subsection{A node creates a new group}
-When a node wants to create a new group, it connects to the RMI-Registry and leaves a reference to itself (Reference object factory lollypop?) under the name of the channel.
+When a node wants to create a new group, it connects to the RMI-Registry and leaves a reference to itself under the name of the channel.
 
 If this succeeds it sets itself as the group leader and adds itself to it's view of the group in the GroupManagementModule.
 
@@ -214,13 +213,13 @@ If the registration fails throw an exception indicating if the name was already 
 The leader removes all members from it's view of the group in GroupManagementModule and then sends this updated view to all members of the group via the CommunicationModule. It then unregisters the group name in the registry.
 
 \subsection{A member joins a group}
-When joining a group the prospective member connects to the RMI-Registry and gets a reference to the group leader. It then sends join request to the group leader. The leader adds the new member to it's view of the group and then sends this updated view to all members of the group, including the new member. When the new member receives the updated view it knows it is part of the group.
+When joining a group the prospective member connects to the RMI-Registry and gets a reference to the group leader and sends it a join request. The leader adds the new member to it's view of the group and then sends this updated view to all members of the group, including the new member. When the new member receives the updated view it knows it is part of the group.
 
 \subsection{A member leaves group}
-When a member wants to leave a group it sends a group view excluding itself to all the members of the group.
+When a member wants to leave a group it sends a group view excluding itself to all the members (including the group-leader) of the group.
 
 \subsection{Send message to a group}
-First a list of all members in the group is obtained from the GroupManagementModule and then the message is sent to all the members.
+First a list of all members in the group is obtained from the GroupManagementModule and then the message is sent to all of the members.
 
 \subsection{Member receives message with much later time-stamp than previous message}
 %TODO: Design a way for a node to request an older message
@@ -233,8 +232,8 @@ When a node receives election-messages it compares the value in the incoming mes
 
 If the group-leader leaves a single member behind this node realizes it is alone in the group and sets itself as group-leader and registers with the registry.
 
-\subsection{Last member leaves group}
-When the last member of a group leaves it unregisters itself from the registry.
+\subsection{The last member in a group leaves}
+When the last member of a group leaves it knows it is the group-leader and it unregisters itself from the registry.
 
 %-----------------------------------------------------------
 \section{Fault tolerance}
@@ -242,14 +241,14 @@ When the last member of a group leaves it unregisters itself from the registry.
 \subsection{Detecting crashed members}
 The GroupManagementModule gets notified when a message is received and can therefore keep track of the time since the last message from a process, measured in vector time. If a process does not send anything for a long time it will be marked as crashed and removed from the group list.
 
-\subsection{If the registry restarts}
+\subsection{If the registry restarts or is unresponsive}
 The leader if each group occasionally checks that the group is registered in the RMI-registry. If the registry has restarted for some reason the leader will re-register the group.
 
 \subsection{If the group leader crashes}
 If the group leader crashes the group elects a new leader. (How?)
 
 \subsection{If the last member of a group crashes}
-If the last member of a group crashes no one will unregister the group. 
+If the last member of a group crashes no one will unregister the group.
 
 \subsection{Netsplit}
 If the group is split in two due to netsplit the part with the leader will continue to work as before, the other half will elect a new leader.
