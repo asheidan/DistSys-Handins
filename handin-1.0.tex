@@ -144,7 +144,7 @@ A framework (middleware) for communicating between distributed nodes within grou
 - createGroup
 	Register at RMI registry
 - removeGroup(String groupName)
-	Removes the group grom the RMI registry
+	Removes the group from the RMI registry
 (leave/disconnect)
 	Send GroupView excluding sending Member
 - listGroups
@@ -233,7 +233,7 @@ When a node receives election-messages it compares the value in the incoming mes
 If the group-leader leaves a single member behind this node realizes it is alone in the group and sets itself as group-leader and registers with the registry.
 
 \subsection{The last member in a group leaves}
-When the last member of a group leaves it knows it is the group-leader and it unregisters itself from the registry.
+When the last member of a group leaves it is the group-leader and it unregisters itself from the registry.
 
 %-----------------------------------------------------------
 \section{Fault tolerance}
@@ -242,16 +242,19 @@ When the last member of a group leaves it knows it is the group-leader and it un
 The GroupManagementModule gets notified when a message is received and can therefore keep track of the time since the last message from a process, measured in vector time. If a process does not send anything for a long time it will be marked as crashed and removed from the group list.
 
 \subsection{If the registry restarts or is unresponsive}
-The leader if each group occasionally checks that the group is registered in the RMI-registry. If the registry has restarted for some reason the leader will re-register the group.
+The leader of each group occasionally checks that the group is registered in the RMI-registry. If the registry has restarted for some reason the leader will re-register the group.
 
 \subsection{If the group leader crashes}
-If the group leader crashes the group elects a new leader. (How?)
+If the group leader crashes the group will detect that no messages arrive from the leader and then elect a new leader. (How?)
 
 \subsection{If the last member of a group crashes}
 If the last member of a group crashes no one will unregister the group.
+This will potentially lead to a lot of "dead" references in the registry if there is a bug causing nodes to crash when they are the last to leave a group. In order to counter this some extra testing will be done to make sure that nodes behave when leaving and unregistering with the registry.
+If the time allows we will try to implement a way to clear out old references in the registry (other than restarting it periodically).
 
 \subsection{Netsplit}
-If the group is split in two due to netsplit the part with the leader will continue to work as before, the other half will elect a new leader.
+If the group is split in two, due to netsplit, the part with the leader will continue to work as before, the other half will elect a new leader.
+The new leader will try to reregister the group in the registry. The leader for the other part will do the same and therefore compete over the reference in the registry. Because of this newcomers will join the group having the reference in the registry at the time the node connects.
 
 %-----------------------------------------------------------
 \section{Limitations}
