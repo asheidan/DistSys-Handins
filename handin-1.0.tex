@@ -157,7 +157,7 @@ A framework (middleware) for communicating between distributed nodes within grou
 
 
 \subsection{CommunicationModule}
-Send and recieves messages to and from other processes. This module must support both reliable and basic multicast. Recieved data is sent to the MessageOrderingModule. The GroupManagementModule is also notified with the senders process ID. 
+Send and receives messages to and from other processes. This module must support both reliable and basic multicast. Received data is sent to the MessageOrderingModule. The GroupManagementModule is also notified with the senders process ID. 
 - receive
 - send(Group, Message)
 	Look up communication type in group
@@ -201,6 +201,8 @@ A central RMI-registry. Single point of failure. Leader registers and unregister
 
 %-----------------------------------------------------------
 \section{Use cases}
+
+A few of the scenarios that might arise during using and testing GCom.
 
 \subsection{A node creates a new group}
 When a node wants to create a new group, it connects to the RMI-Registry and leaves a reference to itself under the name of the channel.
