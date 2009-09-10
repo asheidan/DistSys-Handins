@@ -1,4 +1,4 @@
-\documentclass[11pt,swedish]{article}
+\documentclass[english]{article}
 \usepackage{a4,babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -9,7 +9,7 @@
 \def\email			{}
 \def\course			{Distributed Systems. 5DV020, HT09}
 \def\delivery		{Assignment part 1}
-\def\trivialname	{Project plan}
+\def\trivialname	{Analysis and design}
 \def\tutor			{Lars Larsson, Daniel Henriksson}
 \def\myabstract	{}
 
@@ -22,8 +22,8 @@
 \author \\
 
 \noindent
-Handledare: \tutor \\
-Datum: \today \\
+Tutors: \tutor \\
+Date: \today \\
 
 
 \begin{center}
@@ -57,46 +57,43 @@ We intend to solve bonus level two with dynamic groups.
 \section{Requirement Specification}
 
 \subsection{Group management}
-REQUIRED External processes must be able to find and connect to group leaders via a RMI registry.
+\begin{description}
+\item[REQUIRED] External processes must be able to find and connect to group leaders via a RMI registry.
 
-REQUIRED The group leader must regularly make sure that the group and leader is registered in the RMI registry.
+\item[REQUIRED] The group leader must regularly make sure that the group and leader is registered in the RMI registry.
 
-REQUIRED Any process must be able to create a new group and register itself as leader in the registry.
+\item[REQUIRED] Any process must be able to create a new group and register itself as leader in the registry.
 
-REQUIRED Any process must be able to join a group by connecting to the group leader.
+\item[REQUIRED] Any process must be able to join a group by connecting to the group leader.
 
-REQUIRED Every process in a group must notify the other processes of any known changes to the group composition.
+\item[REQUIRED] Every process in a group must notify the other processes of any known changes to the group composition.
 
-REQUIRED Every process must keep track of the members of all the groups it's a member of.
+\item[REQUIRED] Every process must keep track of the members of all the groups it's a member of.
 
-REQUIRED Every process must monitor if another process in the group stops responding and report a corresponding change in group composition.
+\item[REQUIRED] Every process must monitor if another process in the group stops responding and report a corresponding change in group composition.
 
-REQUIRED If the leader of the group leaves or crashes a new leader must be elected in the group.
-
+\item[REQUIRED] If the leader of the group leaves or crashes a new leader must be elected in the group.
+\end{description}
 
 
 \subsection{Communication}
-REQUIRED It must be possible to send messages to the members of joined group.
+\begin{description}
+\item[REQUIRED] It must be possible to send messages to the members of joined group.
 
-REQUIRED Both non-reliable and reliable multicast must be supported for sending messages.
+\item[REQUIRED] Both non-reliable and reliable multicast must be supported for sending messages.
 
-REQUIRED The communication method chosen by the group creator (reliable or non-reliable multicast) must be used when communicating in a group.
+\item[REQUIRED] The communication method chosen by the group creator (reliable or non-reliable multicast) must be used when communicating in a group.
 
-REQUIRED Every message must contain a updated vector clock.
-
+\item[REQUIRED] Every message must contain a updated vector clock.
+\end{description}
 
 
 \subsection{Message Ordering}
-REQUIRED Any message must arrive in proper order (according to the selected sorting requirements).
+\begin{description}
+\item[REQUIRED] Any message must arrive in proper order (according to the selected sorting requirements).
 
-REQUIRED A message must not be delivered until all previous messages are delivered if the message ordering demands so.
-
-
-Analyze the problem
-- What should be done, what problems needs to be solved
-- Requirement specification
-- What must be implemented
-- What should be implemented
+\item[REQUIRED] A message must not be delivered until all previous messages are delivered if the message ordering demands so.
+\end{description}
 
 %-----------------------------------------------------------
 \section{Suitable tools}
@@ -106,32 +103,27 @@ JUnit will be used for unit testing and logging will be done through the log4j-p
 
 %-----------------------------------------------------------
 \section{Project plan}
-Plan your project
-- Project plan
-- Milestones with dates
-	11 Sept		- Part 1 due
-	18 Sept		- Milestone 1
-					Create interfaces
-					Build dataobjects
-					Design GUI/Mockups for test app
-	25 Sept		- Milestone 2
-	2 Oct		- Milestone 3
-	9 Oct		- Milestone 4
-	16 Oct		- Milestone 5
-	23 Oct		- Everything.
-		Test protocol
-		Full Report
-	27 Oct 		- Hand in
-		Proof reading by someone not involved
-	28-30 Oct 	- Demonstration
+\begin{tabular}{|l|l|l|}
+\hline
+Date	&	Milestone	&	Content \\
+\hline
+11 Sept	&	Part 1 due	&	Written project plan \\
+18 Sept &	Milestone 1 &	Create all interfaces \\ 
+						&&	Build dataobjects \\
+						&&	Design GUI mockups for test app \\
+25 Sept &	Milestone 2 & 	Implement basic methods like non-ordered ordering and non-reliable multicast. \\
+2 Oct	&	Milestone 3 & 	Implement advanced methods like total ordering and reliable multicast. \\
+9 Oct	&	Milestone 4 & 	Implement GUI-application and debug mode. \\
+16 Oct	&	Milestone 5 & 	Resolve distibuted problems. \\ && Write on the report.\\ && Make test protocol. \\
+23 Oct	&	Finalization 	& Everything should be finished. Minor adjustments. \\
+27 Oct	&	Hand in report 	& \\
+28-30 Oct & Demonstration	& \\
+\hline
+\end{tabular}
 
 %-----------------------------------------------------------
 \section{Design}
-Design a solution
-- Write design
-- Implement
-- ???
-- Profit!
+
 
 % TODO: We should design/workout how we will do debugging
 
@@ -140,63 +132,89 @@ A framework (middleware) for communicating between distributed nodes within grou
 This module exposes the functionality of the other modules that are part of GCom so that referencing them directly should not be needed in order to use them.
 	(Interface from previous year http://www.cs.umu.se/kurser/5DV020/HT08/GCom.java)
 
-- joinGroup(String groupName)
-	Contact RMI registry and get group-leader
+\subsubsection{Interface}
+\begin{itemize}
+\item[-]  joinGroup(String groupName) \\
+	Contact RMI registry and get group-leader \\
 	Contact group-leader
-- createGroup
+
+\item[-]  createGroup
 	Register at RMI registry
-- removeGroup(String groupName)
+
+\item[-]  removeGroup(String groupName) \\
 	Removes the group from the RMI registry
-(leave/disconnect)
+
+\item[?] leave/disconnect \\
 	Send GroupView excluding sending Member
-- listGroups
+
+\item[-]  listGroups \\
 	Ask registry
-- listMembers(String groupName)
-- sendMessage(Group, Message)
+
+\item[-]  listMembers(String groupName)
+
+\item[-]  sendMessage(Group, Message) \\
 	Sends a message to the specified group via CommunicationModule
-- connectToRegistry(String host, int port)
+
+\item[-]  connectToRegistry(String host, int port) \\
 	Connects to a RMI registry
+\end{itemize}
 
 
 \subsection{CommunicationModule}
 Send and receives messages to and from other processes. This module must support both reliable and basic multicast. Received data is sent to the MessageOrderingModule. The GroupManagementModule is also notified with the senders process ID. 
-- receive
-- send(Group, Message)
-	Look up communication type in group
-	Look up group members
-+ multicastB
-+ multicastR
 
+\subsubsection{Interface}
+\begin{itemize}
+\item[-] receive
+
+\item[-] send(Group, Message) \\
+	Look up communication type in group \\
+	Look up group members
+
+\item[-] multicastB
+
+\item[-] multicastR
+\end{itemize}
 
 \subsection{MessageOrderingModule}
 Sorts incoming messages and makes sure that they're delivered according to the specified order (Non-ordered, FIFO, Causal, Total, Causal-Total). Non-ordered is the main class and the other ordering methods is implemented as subclasses. 
-- queueMessage(Message)
 
+\subsubsection{Interface}
+\begin{itemize}
+\item[-] queueMessage(Message)
+\end{itemize}
 
 \subsection{GroupManagementModule}
-Stores a group state with group name(s) and group members. Monitors if a process stops responding. Notifies changes in the states to all members of the group (via the CommunicationModule). Resolves group names to a list of members.
-- addGroup
-- removeGroup
-- listGroups
+The GroupManagementModule contains collection of Group objects. It monitors if a process stops responding. Notifies changes in the states to all members of the group (via the CommunicationModule). The GroupManagementModule also resolves group names to a list of members.
+
+\subsubsection{Interface}
+\begin{itemize}
+\item[-] addGroup
+\item[-] removeGroup
+\item[-] listGroups
+\end{itemize}
 
 \subsection{Group}
-- addMember
+Stores a groups state and group members.
+
+\subsubsection{Interface}
+\begin{itemize}
+\item[-] addMember \\
 	Adds the member to the member list
-- removeMember
+\item[-]  removeMember \\
 	Removes the member from the member list
-- listMembers
-- updateica(ProcessID)
+\item[-]  listMembers
+\item[-]  update(ProcessID) \\
 	Updates the last seen vector time for the process
+\end{itemize}
+
 
 \subsection{GUI}
-	Implements listeners
-	Does GUI-stuff
+The GUI class contains the application that uses GCom and is mostly used for testing and demonstration. We intend to write some kind of simple chat application. The GUI registers listeners in the GCom class to get information. 
 
-\subsection{Debug}
-Registers DebugListener in every module.
 
 \subsection{Message}
-	VectorClock
+The Message is a basic data object which can be serialized. It contains a Vector clock, a destination group, message type and the actual message. 
 
 \subsection{RMI Registry}
 A central RMI-registry. Single point of failure. Leader registers and unregisters group. 
@@ -225,7 +243,7 @@ When a member wants to leave a group it sends a group view excluding itself to a
 \subsection{Send message to a group}
 First a list of all members in the group is obtained from the GroupManagementModule and then the message is sent to all of the members.
 
-\subsection{Member receives message with much later time-stamp than previous message}
+%\subsection{Member receives message with much later time-stamp than previous message}
 %TODO: Design a way for a node to request an older message
 
 \subsection{Group-leader leaves group}
@@ -262,10 +280,12 @@ The new leader will try to reregister the group in the registry. The leader for 
 
 %-----------------------------------------------------------
 \section{Limitations}
-The RMI-registry is a single point of failure. If the registry crashes no processes can find or join groups. 
+\begin{itemize}
+\item The RMI-registry is a single point of failure. If the registry crashes no processes can find or join groups. 
 
-If a group is split in two parts due to network failure and both parts still have contact  with the registry bad things will happen. This is assumed to never happen.
+\item If a group is split in two parts due to network failure and both parts still have contact  with the registry bad things will happen. This is assumed to never happen.
 
-All processes are assumed to be good. If a process starts to lie or send malicious messages bad things will happen.
+\item All processes are assumed to be good. If a process starts to lie or send malicious messages bad things will happen.
+\end{itemize}
 
 \end{document}
