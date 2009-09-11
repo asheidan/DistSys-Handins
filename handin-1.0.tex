@@ -54,49 +54,7 @@ We intend to solve bonus level two with dynamic groups.
 
 
 %-----------------------------------------------------------
-\section{Requirement Specification}
-
-\subsection{Group management}
-\begin{description}
-\item[REQUIRED] External processes must be able to find and connect to group leaders via a RMI registry.
-
-\item[REQUIRED] The group leader must regularly make sure that the group and leader is registered in the RMI registry.
-
-\item[REQUIRED] Any process must be able to create a new group and register itself as leader in the registry.
-
-\item[REQUIRED] Any process must be able to join a group by connecting to the group leader.
-
-\item[REQUIRED] Every process in a group must notify the other processes of any known changes to the group composition.
-
-\item[REQUIRED] Every process must keep track of the members of all the groups it's a member of.
-
-\item[REQUIRED] Every process must monitor if another process in the group stops responding and report a corresponding change in group composition.
-
-\item[REQUIRED] If the leader of the group leaves or crashes a new leader must be elected in the group.
-\end{description}
-
-
-\subsection{Communication}
-\begin{description}
-\item[REQUIRED] It must be possible to send messages to the members of joined group.
-
-\item[REQUIRED] Both non-reliable and reliable multicast must be supported for sending messages.
-
-\item[REQUIRED] The communication method chosen by the group creator (reliable or non-reliable multicast) must be used when communicating in a group.
-
-\item[REQUIRED] Every message must contain a updated vector clock.
-\end{description}
-
-
-\subsection{Message Ordering}
-\begin{description}
-\item[REQUIRED] Any message must arrive in proper order (according to the selected sorting requirements).
-
-\item[REQUIRED] A message must not be delivered until all previous messages are delivered if the message ordering demands so.
-\end{description}
-
-%-----------------------------------------------------------
-\section{Suitable tools}
+\section{Tools and language for implementation}
 Since the clear recommendation is to use Java and Java RMI we have decided to follow the recommendation. While there are languages that would be more interesting and easier to design GUIs in (cocoa/objective c), Java is more easily ported and the available help from lecturers also helped tip the balance in Java's favor.
 
 JUnit will be used for unit testing and logging will be done through the log4j-package. 
@@ -130,7 +88,7 @@ Date	&	Milestone	&	Content \\
 \subsection{GCom}
 A framework (middleware) for communicating between distributed nodes within groups.
 This module exposes the functionality of the other modules that are part of GCom so that referencing them directly should not be needed in order to use them.
-	(Interface from previous year http://www.cs.umu.se/kurser/5DV020/HT08/GCom.java)
+%	(Interface from previous year http://www.cs.umu.se/kurser/5DV020/HT08/GCom.java)
 
 \subsubsection{Interface}
 \begin{itemize}
@@ -283,6 +241,50 @@ If the time allows we will try to implement a way to clear out old references in
 \subsection{Netsplit}
 If the group is split in two, due to netsplit, the part with the leader will continue to work as before, the other half will elect a new leader.
 The new leader will try to reregister the group in the registry. The leader for the other part will do the same and therefore compete over the reference in the registry. Because of this newcomers will join the group having the reference in the registry at the time the node connects.
+
+%-----------------------------------------------------------
+\section{Requirement Specification}
+
+\subsection{Group management}
+\begin{description}
+\item[REQUIRED] External processes must be able to find and connect to group leaders via a RMI registry.
+
+\item[REQUIRED] The group leader must regularly make sure that the group and leader is registered in the RMI registry.
+
+\item[REQUIRED] Any process must be able to create a new group and register itself as leader in the registry.
+
+\item[REQUIRED] Any process must be able to join a group by connecting to the group leader.
+
+\item[REQUIRED] Every process in a group must notify the other processes of any known changes to the group composition.
+
+\item[REQUIRED] Every process must keep track of the members of all the groups it's a member of.
+
+\item[REQUIRED] Every process must monitor if another process in the group stops responding and report a corresponding change in group composition.
+
+\item[REQUIRED] If the leader of the group leaves or crashes a new leader must be elected in the group.
+\end{description}
+
+
+\subsection{Communication}
+\begin{description}
+\item[REQUIRED] It must be possible to send messages to the members of joined group.
+
+\item[REQUIRED] Both non-reliable and reliable multicast must be supported for sending messages.
+
+\item[REQUIRED] The communication method chosen by the group creator (reliable or non-reliable multicast) must be used when communicating in a group.
+
+\item[REQUIRED] Every message must contain a updated vector clock.
+\end{description}
+
+
+\subsection{Message Ordering}
+\begin{description}
+\item[REQUIRED] Any message must arrive in proper order (according to the selected sorting requirements).
+
+\item[REQUIRED] A message must not be delivered until all previous messages are delivered if the message ordering demands so.
+\end{description}
+
+
 
 %-----------------------------------------------------------
 \section{Limitations}
