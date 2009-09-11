@@ -92,48 +92,47 @@ This module exposes the functionality of the other modules that are part of GCom
 
 \subsubsection{Interface}
 \begin{itemize}
-\item[-]  joinGroup(String groupName) \\
+\item[+]  joinGroup(String groupName) \\
 	Contact RMI registry and get group-leader \\
 	Contact group-leader
 
-\item[-]  createGroup(String groupName)
+\item[+]  createGroup(String groupName)
 	Register at RMI registry
 
-\item[-]  removeGroup(String groupName) \\
+\item[+]  removeGroup(String groupName) \\
 	Removes the group from the RMI registry
 
-\item[-] leave(String groupName) \\
+\item[+] leave(String groupName) \\
 	Send GroupView excluding sending Member
 
-\item[-]  listGroups \\
+\item[+]  listGroups \\
 	Ask registry
 
-\item[-]  listMembers(String groupName)
+\item[+]  listMembers(String groupName)
 
-\item[-]  sendMessage(Group, Message) \\
+\item[+]  sendMessage(String groupName, Message) \\
 	Sends a message to the specified group via CommunicationModule
 
-\item[-]  connectToRegistry(String host, int port) \\
+\item[+]  connectToRegistry(String host, int port) \\
 	Connects to a RMI registry
 \end{itemize}
-
 
 \subsection{CommunicationModule}
 Sends and receives messages to and from other processes. This module must support both reliable and basic multicast. Received data is sent to the MessageOrderingModule. The GroupManagementModule is also notified with the senders process ID. 
 
 \subsubsection{Interface}
 \begin{itemize}
-\item[-] receive(Message)
+\item[+] receive(Message)
 	This method is called remotely by other nodes when sending messages to this node.
 
-\item[-] send(Group, Message) \\
+\item[+] send(Group, Message) \\
 	Look up communication type in group \\
 	Look up group members
 
-\item[+] multicastB
+\item[-] multicastB
 	Private method used internally to perform a basic multicast.
 
-\item[+] multicastR
+\item[-] multicastR
 	Private method which uses multicastB to perform a reliable multicast.
 
 \end{itemize}
@@ -143,7 +142,7 @@ Sorts incoming messages and makes sure that they're delivered according to the s
 
 \subsubsection{Interface}
 \begin{itemize}
-\item[-] queueMessage(Message)
+\item[+] queueMessage(Message)
 \end{itemize}
 
 \subsection{GroupManagementModule}
@@ -151,9 +150,9 @@ The GroupManagementModule contains collection of Group objects. It monitors if a
 
 \subsubsection{Interface}
 \begin{itemize}
-\item[-] addGroup(String groupName)
-\item[-] removeGroup(String groupName)
-\item[-] listGroups
+\item[+] addGroup(String groupName)
+\item[+] removeGroup(String groupName)
+\item[+] listGroups
 \end{itemize}
 
 \subsection{Group}
@@ -161,12 +160,12 @@ Stores a group's state and group members.
 
 \subsubsection{Interface}
 \begin{itemize}
-\item[-] addMember \\
+\item[+] addMember \\
 	Adds the member to the member list
-\item[-]  removeMember \\
+\item[+]  removeMember \\
 	Removes the member from the member list
-\item[-]  listMembers
-\item[-]  update(ProcessID) \\
+\item[+]  listMembers
+\item[+]  update(ProcessID) \\
 	Updates the last seen vector time for the process
 \end{itemize}
 
@@ -180,6 +179,11 @@ The Message is a basic data object which can be serialized. It contains a Vector
 
 \subsection{RMI Registry}
 A central RMI-registry. Single point of failure. Leader registers and unregisters group. 
+
+\begin{figure}[h]
+	\includegraphics[width=150mm]{klasser.png}
+	\caption{How the modules are related.}
+\end{figure}
 
 %-----------------------------------------------------------
 \section{Use cases}
@@ -225,7 +229,7 @@ When the last member of a group leaves it is the group-leader and it unregisters
 \section{Fault tolerance}
 
 \subsection{Detecting crashed members}
-The GroupManagementModule gets notified when a message is received and can therefore keep track of the time since the last message was received from a process, measured in vector time. If a process does not send anything for a long time it will be marked as crashed and removed from the group list.
+The GroupManagementModule gets notified when a message is received and can therefore keep track of the time since the last message from a process, measured in vector time. If a process does not send anything for a long time it will be marked as crashed and removed from the group list.
 
 \subsection{If the registry restarts or is unresponsive}
 The leader of each group checks that the group is registered in the RMI-registry with a predefined intervall. If the registry has restarted for some reason the leader will re-register the group.
@@ -235,7 +239,7 @@ If the group leader crashes the group will detect that no messages arrive from t
 
 \subsection{If the last member of a group crashes}
 If the last member of a group crashes no one will unregister the group.
-This will potentially lead to a lot of "dead" references in the registry if there is a bug causing nodes to crash when they are the last to leave a group. In order to counter, this some extra testing will be done to make sure that nodes behave when leaving and unregistering with the registry.
+This will potentially lead to a lot of "dead" references in the registry if there is a bug causing nodes to crash when they are the last to leave a group. In order to counter this some extra testing will be done to make sure that nodes behave when leaving and unregistering with the registry.
 If the time allows we will try to implement a way to clear out old references in the registry (other than restarting it periodically).
 
 \subsection{Netsplit}
