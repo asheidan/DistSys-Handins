@@ -244,7 +244,7 @@ If the time allows we will try to implement a way to clear out old references in
 
 \subsection{Netsplit}
 If the group is split in two partitions, due to a cable failure or similar, the partition with the leader will continue to work as before. The other partition will elect a new leader when they discover that they no longer receive messages from the leader.
-The new leader will try to reregister the group in the registry. The leader for the other part will do the same and therefore compete over the reference in the registry. Because of this, newcomers will join the group having the reference in the registry at the time the node connects.
+The new leader will try to reregister the group in the registry. The leader for the other part will do the same and therefore compete over the reference in the registry. Because of this newcomers will join the group having the reference in the registry at the time the node connects.
 
 %-----------------------------------------------------------
 \section{Requirement Specification}
