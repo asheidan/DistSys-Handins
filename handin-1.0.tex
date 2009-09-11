@@ -119,7 +119,7 @@ This module exposes the functionality of the other modules that are part of GCom
 
 
 \subsection{CommunicationModule}
-Send and receives messages to and from other processes. This module must support both reliable and basic multicast. Received data is sent to the MessageOrderingModule. The GroupManagementModule is also notified with the senders process ID. 
+Sends and receives messages to and from other processes. This module must support both reliable and basic multicast. Received data is sent to the MessageOrderingModule. The GroupManagementModule is also notified with the senders process ID. 
 
 \subsubsection{Interface}
 \begin{itemize}
@@ -191,7 +191,7 @@ When a node wants to create a new group, it connects to the RMI-Registry and lea
 
 If this succeeds it sets itself as the group leader and adds itself to it's view of the group in the GroupManagementModule.
 
-If the registration fails throw an exception indicating if the name was already taken or the RMI-Registry was unresponsive.
+If the registration fails an exception indicating if the name was already taken or the RMI-Registry was unresponsive is thrown.
 
 \subsection{A group leader removes a group}
 The leader removes all members from it's view of the group in GroupManagementModule and then sends this updated view to all members of the group via the CommunicationModule. It then unregisters the group name in the registry.
@@ -225,22 +225,22 @@ When the last member of a group leaves it is the group-leader and it unregisters
 \section{Fault tolerance}
 
 \subsection{Detecting crashed members}
-The GroupManagementModule gets notified when a message is received and can therefore keep track of the time since the last message from a process, measured in vector time. If a process does not send anything for a long time it will be marked as crashed and removed from the group list.
+The GroupManagementModule gets notified when a message is received and can therefore keep track of the time since the last message was received from a process, measured in vector time. If a process does not send anything for a long time it will be marked as crashed and removed from the group list.
 
 \subsection{If the registry restarts or is unresponsive}
-The leader of each group occasionally checks that the group is registered in the RMI-registry. If the registry has restarted for some reason the leader will re-register the group.
+The leader of each group checks that the group is registered in the RMI-registry with a predefined intervall. If the registry has restarted for some reason the leader will re-register the group.
 
 \subsection{If the group leader crashes}
-If the group leader crashes the group will detect that no messages arrive from the leader and then elect a new leader. (How?)
+If the group leader crashes the group will detect that no messages arrive from the leader and then elect a new leader.
 
 \subsection{If the last member of a group crashes}
 If the last member of a group crashes no one will unregister the group.
-This will potentially lead to a lot of "dead" references in the registry if there is a bug causing nodes to crash when they are the last to leave a group. In order to counter this some extra testing will be done to make sure that nodes behave when leaving and unregistering with the registry.
+This will potentially lead to a lot of "dead" references in the registry if there is a bug causing nodes to crash when they are the last to leave a group. In order to counter, this some extra testing will be done to make sure that nodes behave when leaving and unregistering with the registry.
 If the time allows we will try to implement a way to clear out old references in the registry (other than restarting it periodically).
 
 \subsection{Netsplit}
-If the group is split in two, due to netsplit, the part with the leader will continue to work as before, the other half will elect a new leader.
-The new leader will try to reregister the group in the registry. The leader for the other part will do the same and therefore compete over the reference in the registry. Because of this newcomers will join the group having the reference in the registry at the time the node connects.
+If the group is split in two partitions, due to a cable failure or similar, the partition with the leader will continue to work as before. The other partition will elect a new leader when they discover that they no longer receive messages from the leader.
+The new leader will try to reregister the group in the registry. The leader for the other part will do the same and therefore compete over the reference in the registry. Because of this, newcomers will join the group having the reference in the registry at the time the node connects.
 
 %-----------------------------------------------------------
 \section{Requirement Specification}
