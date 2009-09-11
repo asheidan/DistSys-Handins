@@ -114,7 +114,7 @@ Date	&	Milestone	&	Content \\
 25 Sept &	Milestone 2 & 	Implement basic methods like non-ordered ordering and non-reliable multicast. \\
 2 Oct	&	Milestone 3 & 	Implement advanced methods like total ordering and reliable multicast. \\
 9 Oct	&	Milestone 4 & 	Implement GUI-application and debug mode. \\
-16 Oct	&	Milestone 5 & 	Resolve distibuted problems. \\ && Write on the report.\\ && Make test protocol. \\
+16 Oct	&	Milestone 5 & 	Resolve distributed problems. \\ && Write on the report.\\ && Make test protocol. \\
 23 Oct	&	Finalization 	& Everything should be finished. Minor adjustments. \\
 27 Oct	&	Hand in report 	& \\
 28-30 Oct & Demonstration	& \\
@@ -138,13 +138,13 @@ This module exposes the functionality of the other modules that are part of GCom
 	Contact RMI registry and get group-leader \\
 	Contact group-leader
 
-\item[-]  createGroup
+\item[-]  createGroup(String groupName)
 	Register at RMI registry
 
 \item[-]  removeGroup(String groupName) \\
 	Removes the group from the RMI registry
 
-\item[?] leave/disconnect \\
+\item[-] leave(String groupName) \\
 	Send GroupView excluding sending Member
 
 \item[-]  listGroups \\
@@ -165,15 +165,19 @@ Send and receives messages to and from other processes. This module must support
 
 \subsubsection{Interface}
 \begin{itemize}
-\item[-] receive
+\item[-] receive(Message)
+	This method is called remotely by other nodes when sending messages to this node.
 
 \item[-] send(Group, Message) \\
 	Look up communication type in group \\
 	Look up group members
 
-\item[-] multicastB
+\item[+] multicastB
+	Private method used internally to perform a basic multicast.
 
-\item[-] multicastR
+\item[+] multicastR
+	Private method which uses multicastB to perform a reliable multicast.
+
 \end{itemize}
 
 \subsection{MessageOrderingModule}
@@ -189,13 +193,13 @@ The GroupManagementModule contains collection of Group objects. It monitors if a
 
 \subsubsection{Interface}
 \begin{itemize}
-\item[-] addGroup
-\item[-] removeGroup
+\item[-] addGroup(String groupName)
+\item[-] removeGroup(String groupName)
 \item[-] listGroups
 \end{itemize}
 
 \subsection{Group}
-Stores a groups state and group members.
+Stores a group's state and group members.
 
 \subsubsection{Interface}
 \begin{itemize}
@@ -251,6 +255,8 @@ When the group-leader leaves the group the remaining members starts electing a n
 
 %TODO: A crashed node could make a group-leader election fail.
 When a node receives election-messages it compares the value in the incoming message with the value it created and sends the larger of these to all other nodes. When a node has received messages with it's own value from all members of the group it sets itself as group-leader and registers with the RMI-Registry.
+
+For now we do not take into account that a node might crash during the election.
 
 If the group-leader leaves a single member behind this node realizes it is alone in the group and sets itself as group-leader and registers with the registry.
 
